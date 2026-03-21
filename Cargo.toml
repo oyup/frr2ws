@@ -1,0 +1,43 @@
+[package]
+name    = "webpentest"
+version = "0.1.0"
+edition = "2021"
+authors = ["dbfrs"]
+description = "web-application pentesting suite"
+
+[[bin]]
+name = "webpentest"
+path = "src/main.rs"
+
+[dependencies]
+tokio        = { version = "1",  features = ["full"] }
+futures      = "0.3"
+
+reqwest      = { version = "0.12", features = ["rustls-tls", "cookies", "json", "stream"], default-features = false }
+
+rustls       = "0.23"
+rustls-pki-types = "1"
+webpki-roots = "0.26"
+
+clap         = { version = "4", features = ["derive", "color"] }
+
+serde        = { version = "1", features = ["derive"] }
+serde_json   = "1"
+
+colored      = "2"
+indicatif    = { version = "0.17", features = ["tokio"] }
+
+url          = "2"
+chrono       = { version = "0.4", features = ["serde"] }
+anyhow       = "1"
+thiserror    = "1"
+regex        = "1"
+base64       = "0.22"
+once_cell    = "1"
+tokio-stream = "0.1"
+
+[profile.release]
+opt-level   = 3
+lto         = true
+codegen-units = 1
+strip       = true
