@@ -2,7 +2,7 @@
 name    = "webpentest"
 version = "0.1.0"
 edition = "2021"
-authors = ["dbfrs"]
+authors = ["eiey"]
 description = "web-application pentesting suite"
 
 [[bin]]
