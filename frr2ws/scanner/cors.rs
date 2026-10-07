@@ -16,7 +16,6 @@ static PROBE_ORIGINS: &[(&str, &str)] = &[
 
 pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
     let mut result = ScanResult::new("cors", url);
-
     for (origin, description) in PROBE_ORIGINS {
         let resp = match client
             .options(url)
@@ -31,25 +30,21 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
         };
 
         let headers = resp.headers();
-
         let acao = headers
             .get("access-control-allow-origin")
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
             .to_string();
-
         let acac = headers
             .get("access-control-allow-credentials")
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
             .to_lowercase();
-
         if acao.is_empty() {
             if *origin == "null" {
             }
             continue;
         }
-
         if acao == "*" && acac == "true" {
             result.push(
                 Finding::new(
@@ -72,7 +67,6 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
             } else {
                 Severity::High
             };
-
             result.push(
                 Finding::new(
                     sev,
