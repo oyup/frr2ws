@@ -21,13 +21,10 @@ static PAYLOADS: &[(&str, &str)] = &[
 
 pub async fn scan(client: &Client, url: &str, param: &str) -> Result<ScanResult> {
     let mut result = ScanResult::new("xss", url);
-
     let base: Url = url.parse()?;
-
     for (payload, pattern) in PAYLOADS {
         let mut test_url = base.clone();
         test_url.query_pairs_mut().append_pair(param, payload);
-
         let resp = match client.get(test_url.as_str()).send().await {
             Ok(r)  => r,
             Err(_) => continue,
@@ -39,9 +36,7 @@ pub async fn scan(client: &Client, url: &str, param: &str) -> Result<ScanResult>
             .and_then(|v| v.to_str().ok())
             .unwrap_or("")
             .to_lowercase();
-
         let body = resp.text().await?;
-
         if ct.contains("json") || ct.contains("xml") {
             if body.contains(payload.trim_start_matches('"')) {
                 result.push(
