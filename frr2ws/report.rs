@@ -128,7 +128,6 @@ impl Report {
         );
         println!("  Target : {}", self.target.bright_cyan());
         println!("{}", border.bright_white());
-
         for scan in &self.scans {
             println!(
                 "\n┌─ {} {} {}",
@@ -136,7 +135,6 @@ impl Report {
                 scan.scanner.to_uppercase().bold(),
                 format!("({})", scan.target).dimmed()
             );
-
             if scan.findings.is_empty() {
                 println!("│  {} No findings", "✓".bright_green());
             } else {
@@ -161,7 +159,6 @@ impl Report {
         let mut med  = 0usize;
         let mut low  = 0usize;
         let mut info = 0usize;
-
         for scan in &self.scans {
             for f in &scan.findings {
                 match f.severity {

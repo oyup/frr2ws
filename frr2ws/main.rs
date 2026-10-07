@@ -13,7 +13,6 @@ use report::Report;
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
-
     let mut default_headers = header::HeaderMap::new();
     default_headers.insert(
         header::USER_AGENT,
