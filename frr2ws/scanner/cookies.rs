@@ -7,10 +7,8 @@ use crate::{
 
 pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
     let mut result = ScanResult::new("cookies", url);
-
     let resp = client.get(url).send().await?;
     let is_https = url.starts_with("https://");
-
     let set_cookie_headers: Vec<String> = resp
         .headers()
         .get_all("set-cookie")
@@ -30,13 +28,11 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
     for raw in &set_cookie_headers {
         let name = raw.split('=').next().unwrap_or("unknown").trim().to_string();
         let lower = raw.to_lowercase();
-
         let has_secure    = lower.contains("; secure")    || lower.contains(";secure");
         let has_httponly  = lower.contains("; httponly")  || lower.contains(";httponly");
         let has_samesite  = lower.contains("; samesite")  || lower.contains(";samesite");
         let samesite_none = lower.contains("samesite=none");
         let samesite_lax  = lower.contains("samesite=lax");
-
         if is_https && !has_secure {
             result.push(
                 Finding::new(
