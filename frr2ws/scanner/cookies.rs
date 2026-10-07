@@ -1,5 +1,4 @@
 use reqwest::Client;
-
 use crate::{
     error::Result,
     report::{Finding, Severity, ScanResult},
@@ -15,7 +14,6 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
         .iter()
         .filter_map(|v| v.to_str().ok().map(|s| s.to_string()))
         .collect();
-
     if set_cookie_headers.is_empty() {
         result.push(Finding::new(
             Severity::Info,
@@ -45,7 +43,6 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
                 .with_remediation("Add the Secure attribute: Set-Cookie: name=value; Secure; ..."),
             );
         }
-
         if !has_httponly {
             let sev = if is_session_cookie(&name, &lower) {
                 Severity::High
@@ -62,7 +59,6 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
                 .with_remediation("Add the HttpOnly attribute: Set-Cookie: name=value; HttpOnly; ..."),
             );
         }
-
         if !has_samesite {
             result.push(
                 Finding::new(
@@ -85,7 +81,6 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
                 .with_remediation("Add Secure alongside SameSite=None."),
             );
         }
-
         if samesite_lax && is_session_cookie(&name, &lower) {
             result.push(
                 Finding::new(
@@ -97,7 +92,6 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
                 .with_evidence(raw.clone()),
             );
         }
-
         let has_expiry = lower.contains("max-age=") || lower.contains("expires=");
         if !has_expiry && is_session_cookie(&name, &lower) {
             result.push(
@@ -110,7 +104,6 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
                 .with_evidence(raw.clone()),
             );
         }
-
         if let Some(domain_val) = extract_attr(&lower, "domain=") {
             if domain_val.starts_with('.') {
                 result.push(
@@ -128,11 +121,9 @@ pub async fn scan(client: &Client, url: &str) -> Result<ScanResult> {
             }
         }
     }
-
     result = result.with_metadata(serde_json::json!({
         "cookie_count": set_cookie_headers.len(),
     }));
-
     Ok(result)
 }
 
