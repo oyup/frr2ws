@@ -10,39 +10,30 @@ use crate::{
 };
 
 static BUILTIN_WORDLIST: &[&str] = &[
-    // admin
     "admin", "administrator", "admin/login", "admin/index", "admin.php",
     "admin.html", "wp-admin", "wp-login.php", "controlpanel", "cpanel",
-    // config
     ".env", ".env.local", ".env.backup", ".git/config", ".git/HEAD",
     ".gitignore", ".htaccess", ".htpasswd", "config.php", "config.yml",
     "config.yaml", "settings.py", "settings.php", "database.yml",
     "secrets.yml", "credentials.json", "application.properties",
     "web.config", "composer.json", "package.json", "Makefile",
-    // backups
     "backup", "backup.zip", "backup.tar.gz", "backup.sql", "db.sql",
     "dump.sql", "site.tar.gz", "www.zip", "old",
-    // common paths
     "login", "signin", "signup", "register", "logout",
     "api", "api/v1", "api/v2", "api/swagger", "swagger", "swagger-ui",
     "swagger-ui.html", "swagger.json", "openapi.json", "graphql",
     "graphiql", "metrics", "health", "healthz", "status",
     "debug", "trace", "actuator", "actuator/env", "actuator/health",
     "actuator/metrics", "actuator/logfile",
-    // static
     "uploads", "files", "media", "static", "assets", "images",
     "img", "js", "css", "fonts",
-    // info
     "server-status", "server-info", "phpinfo.php", "info.php",
     "test.php", "test.html", "robots.txt", "sitemap.xml",
-    // CMS
     "wp-content/debug.log", "wp-json", "xmlrpc.php",
     "joomla", "drupal", "magento",
-    // docs
     "docs", "documentation", "readme", "README.md", "CHANGELOG.md",
     "LICENSE", "Dockerfile", "docker-compose.yml", "k8s", "helm",
     "prometheus", "grafana", "kibana", "jenkins",
-    // tokens
     "oauth/token", "oauth2/token", "token", "auth",
     "id_rsa", "id_rsa.pub", "private.key", "server.key",
 ];
@@ -62,7 +53,6 @@ pub async fn scan(
     status_codes: &str,
 ) -> Result<ScanResult> {
     let mut result = ScanResult::new("dirs", base_url);
-
     let accepted: HashSet<u16> = status_codes
         .split(',')
         .filter_map(|s| s.trim().parse().ok())
@@ -80,7 +70,6 @@ pub async fn scan(
 
     let base: Url = base_url.parse()?;
     let word_count = words.len();
-
     let mut dir_findings: Vec<DirFinding> = stream::iter(words)
         .map(|word| {
             let client = client.clone();
@@ -117,7 +106,6 @@ pub async fn scan(
         .await;
 
     dir_findings.sort_by_key(|f| f.status);
-
     result = result.with_metadata(serde_json::json!({
         "words_tested": word_count,
         "hits": dir_findings.len(),
@@ -154,7 +142,6 @@ pub async fn scan(
 
 fn classify_path(path: &str, status: u16) -> (Severity, String) {
     let p = path.to_lowercase();
-
     if p.contains(".git") || p.contains(".env") || p.contains("private.key")
         || p.contains("id_rsa") || p.contains("credentials") || p.contains("secrets")
         || p.contains("backup.sql") || p.contains("dump.sql")
