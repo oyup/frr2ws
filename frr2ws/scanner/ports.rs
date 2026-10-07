@@ -9,7 +9,6 @@ use crate::{
     report::{Finding, Severity, ScanResult},
 };
 
-/// well known port
 fn well_known(port: u16) -> Option<(&'static str, Option<(&'static str, Severity)>)> {
     Some(match port {
         21   => ("FTP",          Some(("FTP transmits credentials in cleartext; anonymous login may be enabled.", Severity::High))),
@@ -58,14 +57,12 @@ pub async fn scan(
     let target_str = format!("{host}:{start}-{end}");
     let mut result = ScanResult::new("ports", &target_str);
     let timeout    = Duration::from_millis(timeout_ms);
-
     let addr_str = format!("{host}:0");
     let ip = tokio::net::lookup_host(&addr_str)
         .await?
         .next()
         .map(|a| a.ip())
         .unwrap_or_else(|| "0.0.0.0".parse().unwrap());
-
     let mut open_ports: Vec<u16> = stream::iter(start..=end)
         .map(|port| {
             let addr = SocketAddr::new(ip, port);

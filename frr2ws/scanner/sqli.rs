@@ -63,9 +63,7 @@ pub async fn scan(
     extra_params: &[String],
 ) -> Result<ScanResult> {
     let mut result = ScanResult::new("sqli", url);
-
     let base: Url = url.parse()?;
-
     let extras: Vec<(String, String)> = extra_params
         .iter()
         .filter_map(|s| {
@@ -78,10 +76,8 @@ pub async fn scan(
     let baseline_resp = client.get(baseline_url.as_str()).send().await?;
     let baseline_body = baseline_resp.text().await?.to_lowercase();
     let baseline_len  = baseline_body.len();
-
     for (payload, technique) in PAYLOADS {
         let test_url = build_url(&base, param, payload, &extras);
-
         let t0   = std::time::Instant::now();
         let resp = match client.get(test_url.as_str()).send().await {
             Ok(r)  => r,
@@ -89,7 +85,6 @@ pub async fn scan(
         };
         let elapsed = t0.elapsed().as_secs();
         let body    = resp.text().await?.to_lowercase();
-
         for sig in ERROR_SIGNATURES {
             if body.contains(sig) && !baseline_body.contains(sig) {
                 result.push(

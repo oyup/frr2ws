@@ -80,7 +80,6 @@ static DISCOURAGED: &[(&str, &str, Severity)] = &[
 
 pub async fn scan(client: &Client, url: &str, follow_redirects: bool) -> Result<ScanResult> {
     let mut result = ScanResult::new("headers", url);
-
     let req = if follow_redirects {
         client.get(url)
     } else {
@@ -90,7 +89,6 @@ pub async fn scan(client: &Client, url: &str, follow_redirects: bool) -> Result<
     let resp = req.send().await?;
     let headers = resp.headers().clone();
     let status  = resp.status();
-
     result = result.with_metadata(serde_json::json!({
         "status_code": status.as_u16(),
         "final_url":   resp.url().as_str(),

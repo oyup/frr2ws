@@ -13,49 +13,36 @@ use crate::{
 pub async fn scan(host: &str, port: u16) -> Result<ScanResult> {
     let target = format!("{host}:{port}");
     let mut result = ScanResult::new("tls", &target);
-
     let root_store = rustls::RootCertStore {
         roots: webpki_roots::TLS_SERVER_ROOTS.to_vec(),
     };
-
     let config = ClientConfig::builder()
         .with_root_certificates(root_store)
         .with_no_client_auth();
-
     let config = Arc::new(config);
-
     let server_name = ServerName::try_from(host.to_string())
         .map_err(|e| SuiteError::Tls(format!("Invalid server name: {e}")))?;
-
     let host_owned = host.to_string();
     let result_data = tokio::task::spawn_blocking(move || -> std::result::Result<serde_json::Value, String> {
         let stream = TcpStream::connect(&format!("{host_owned}:{port}"))
             .map_err(|e| format!("TCP connect failed: {e}"))?;
         stream.set_read_timeout(Some(std::time::Duration::from_secs(5)))
             .map_err(|e| e.to_string())?;
-
         let mut conn = rustls::ClientConnection::new(config, server_name)
             .map_err(|e| format!("TLS setup: {e}"))?;
-
         let mut tls_stream = rustls::Stream::new(&mut conn, &mut { stream });
-
         use std::io::Read;
         let mut buf = [0u8; 1];
         let _ = tls_stream.read(&mut buf); 
-
         let conn = tls_stream.conn;
-
         let version = conn.protocol_version()
             .map(|v| format!("{v:?}"))
             .unwrap_or_else(|| "Unknown".to_string());
-
         let cipher = conn.negotiated_cipher_suite()
             .map(|cs| format!("{:?}", cs.suite()))
             .unwrap_or_else(|| "Unknown".to_string());
-
         let certs = conn.peer_certificates().unwrap_or_default();
         let cert_count = certs.len();
-
         let mut cert_info = Vec::new();
         for (i, cert_der) in certs.iter().enumerate() {
             cert_info.push(serde_json::json!({
@@ -78,9 +65,7 @@ pub async fn scan(host: &str, port: u16) -> Result<ScanResult> {
         Ok(data) => {
             let version = data["protocol_version"].as_str().unwrap_or("Unknown");
             let cipher  = data["cipher_suite"].as_str().unwrap_or("Unknown");
-
             result = result.with_metadata(data.clone());
-
             if version.contains("TLSv1_0") || version.contains("TLSv1_1") {
                 result.push(
                     Finding::new(

@@ -21,26 +21,22 @@ static PAYLOADS: &[(&str, &str)] = &[
 
 pub async fn scan(client: &Client, url: &str, param: &str) -> Result<ScanResult> {
     let mut result = ScanResult::new("redirects", url);
-
     let no_redirect = reqwest::Client::builder()
         .redirect(redirect::Policy::none())
         .danger_accept_invalid_certs(true)
         .build()
         .unwrap_or_else(|_| client.clone());
-
     let base: Url = url.parse()?;
 
     for (payload, description) in PAYLOADS {
         let mut test_url = base.clone();
         test_url.query_pairs_mut().append_pair(param, payload);
-
         let resp = match no_redirect.get(test_url.as_str()).send().await {
             Ok(r)  => r,
             Err(_) => continue,
         };
 
         let status = resp.status().as_u16();
-
         if !(300..=399).contains(&status) {
             continue;
         }
@@ -58,7 +54,6 @@ pub async fn scan(client: &Client, url: &str, param: &str) -> Result<ScanResult>
 
         let redirects_off_site = is_off_site(&location, &base);
         let has_javascript = location.trim_start().to_lowercase().starts_with("javascript:");
-
         if has_javascript {
             result.push(
                 Finding::new(
